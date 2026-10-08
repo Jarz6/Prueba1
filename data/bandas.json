@@ -1,0 +1,67 @@
+[
+  {
+    "id": 1,
+    "nombre": "Foo Fighters",
+    "estilo": "Alternative Rock / Post-Grunge",
+    "album": "Greatest Hits",
+    "imagen": "foo.jpg",
+    "repertorio": [
+      "The Pretender",
+      "My Hero",
+      "All My Life",
+      "Everlong"
+    ]
+  },
+  {
+    "id": 2,
+    "nombre": "Igorrr",
+    "estilo": "Breakcore / Avant-Garde Metal",
+    "album": "Savage Sinusoid",
+    "imagen": "igorrr.jpg",
+    "repertorio": [
+      "Problème d'émotion",
+      "Au Revoir",
+      "Cheval",
+      "Spaghetti Forever"
+    ]
+  },
+  {
+    "id": 3,
+    "nombre": "Tool",
+    "estilo": "Progressive Metal / Art Rock",
+    "album": "10,000 Days",
+    "imagen": "tool.jpg",
+    "repertorio": [
+      "Vicarious",
+      "Jambi",
+      "Lost Keys (Blame Hofmann)",
+      "10,000 Days (Wings Pt 2)"
+    ]
+  },
+  {
+    "id": 4,
+    "nombre": "Tata Barahona",
+    "estilo": "Trova / Folk Chileno",
+    "album": "Fotografías",
+    "imagen": "tata.jpg",
+    "repertorio": [
+      "La Mejicana",
+      "Republica",
+      "Te vas de mi",
+      "No le entregues el poder"
+    ]
+  },
+  {
+    "id": 5,
+    "nombre": "System of a Down",
+    "estilo": "Alternative Metal / Nu Metal",
+    "album": "Mezmerize",
+    "imagen": "system.jpg",
+    "repertorio": [
+      "B.Y.O.B.",
+      "Chop Suey!",
+      "Radio/Video",
+      "Question!"
+    ]
+  }
+]

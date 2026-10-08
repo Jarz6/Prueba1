@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Métricas - Rocola Virtual{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Resumen y Métricas de la Rocola</h2>
+
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card text-white bg-primary shadow-sm h-100">
+            <div class="card-body text-center py-4">
+                <h5 class="card-title">Modos de Reproducción Disponibles</h5>
+                <p class="display-4 fw-bold">{{ total_modos }}</p>
+                <p class="card-text">Opciones configuradas en la base de datos de la rocola.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card text-white bg-success shadow-sm h-100">
+            <div class="card-body text-center py-4">
+                <h5 class="card-title">Promedio de Duración por Sesión</h5>
+                <p class="display-4 fw-bold">{{ promedio_duracion|floatformat:0 }} min</p>
+                <p class="card-text">Tiempo promedio calculado mediante consultas del ORM de Django.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

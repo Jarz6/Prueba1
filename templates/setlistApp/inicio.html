@@ -1,0 +1,20 @@
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Inicio - Setlist App{% endblock %}
+
+{% block content %}
+<div class="row align-items-center">
+    <div class="col-md-6">
+        <h1 class="display-5 fw-bold text-primary">Repertorio y Precios</h1>
+        <p class="lead text-muted mt-3">
+            Explora las bandas disponibles, sus estilos y el repertorio por álbum.
+        </p>
+        <a href="{% url 'lista_bandas' %}" class="btn btn-primary btn-lg mt-2">Ver Catalogo</a>
+    </div>
+    <div class="col-md-6 text-center mt-4 mt-md-0">
+        <img src="{% static 'img/banda.jpg' %}" alt="Banda" class="img-fluid rounded shadow" style="max-height: 350px; object-fit: cover;">
+    </div>
+</div>
+{% endblock %}

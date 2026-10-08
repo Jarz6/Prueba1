@@ -1,0 +1,57 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Rocola Virtual{% endblock %}</title>
+    <!-- Bootstrap CSS Local -->
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+</head>
+<body class="d-flex flex-column min-vh-100 bg-light">
+
+    <!-- Barra de Navegación Principal -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="{% url 'inicio_setlist' %}">📻 Rocola Virtual</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuPrincipal" aria-controls="menuPrincipal" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="menuPrincipal">
+                <ul class="navbar-nav ms-auto">
+                    <!-- Enlaces App 1: setlistApp -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'inicio_setlist' %}">Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'lista_bandas' %}">Catálogo de Bandas</a>
+                    </li>
+                    <!-- Enlaces App 2: cobrosApp -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'planes_cobros' %}">Tarifas de Rocola</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'resumen_cobros' %}">Métricas</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido Dinámico -->
+    <main class="container my-5 flex-grow-1">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- Pie de Página -->
+    <footer class="bg-dark text-white text-center py-3 mt-auto">
+        <div class="container">
+            <small>&copy; Jorge Rodriguez - Evaluación Back End</small>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS Local -->
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

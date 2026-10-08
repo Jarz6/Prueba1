@@ -1,0 +1,14 @@
+[
+  {
+    "id": 1,
+    "tipo_show": "Set corto aleatorio",
+    "duracion_minutos": 10,
+    "precio_base": 2000
+  },
+  {
+    "id": 2,
+    "tipo_show": "Album completo",
+    "duracion_minutos": 60,
+    "precio_base": 10000
+  }
+]
