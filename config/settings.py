@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 import pymysql
 
 # Habilitar soporte MySQL mediante PyMySQL
-pymysql.install_as_mysqlconverter()
+
 pymysql.install_as_MySQLdb()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
