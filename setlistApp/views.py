@@ -1,12 +1,165 @@
-from django.shortcuts import render
-from .models import Banda
+import uuid
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.db.models import Q, Avg
 
-def inicio(request):
-    return render(request, 'setlistApp/inicio.html')
+from .models import Banda, Cancion, Estilo
+from .forms import BandaForm, TarifaForm, TicketForm
+from .decorators import rol_requerido
+from cobrosApp.models import TarifaRocola, TicketReproduccion
 
-def lista_bandas(request):
-    bandas = Banda.objects.select_related('estilo').prefetch_related('repertorio').all()
-    contexto = {
-        'bandas': bandas
+# --- AUTENTICACIÓN PROPIA ---
+def login_view(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+    
+    if request.method == 'POST':
+        usuario = request.POST.get('username')
+        clave = request.POST.get('password')
+        user = authenticate(request, username=usuario, password=clave)
+        if user is not None:
+            login(request, user)
+            return redirect('dashboard')
+        else:
+            messages.error(request, 'Usuario o contraseña incorrectos.')
+            
+    return render(request, 'auth/login.html')
+
+def logout_view(request):
+    logout(request)
+    return redirect('login')
+
+# --- DASHBOARD DIFERENCIADO POR PERFIL ---
+@login_required
+def dashboard_view(request):
+    usuario = request.user
+    es_admin = usuario.is_superuser or usuario.groups.filter(name='Administrador').exists()
+    es_supervisor = usuario.groups.filter(name='Supervisor').exists()
+    es_administrativo = usuario.groups.filter(name='Administrativo').exists()
+
+    metricas = {
+        'total_bandas': Banda.objects.count(),
+        'total_tarifas': TarifaRocola.objects.count(),
+        'total_tickets': TicketReproduccion.objects.count(),
+        'promedio_tarifa': TarifaRocola.objects.aggregate(Avg('precio_base'))['precio_base__avg'] or 0,
     }
-    return render(request, 'setlistApp/bandas.html', contexto)
+
+    context = {
+        'es_admin': es_admin,
+        'es_supervisor': es_supervisor,
+        'es_administrativo': es_administrativo,
+        'metricas': metricas,
+        'tickets_recientes': TicketReproduccion.objects.select_related('cancion', 'tarifa', 'usuario').order_by('-fecha_solicitud')[:5],
+    }
+    return render(request, 'dashboard/dashboard.html', context)
+
+# --- MANTENEDOR 1: BANDAS (CRUD) ---
+@login_required
+@rol_requerido(['Administrador', 'Supervisor'])
+def lista_bandas(request):
+    query = request.GET.get('q', '')
+    if query:
+        bandas = Banda.objects.filter(Q(nombre__icontains=query) | Q(album__icontains=query)).select_related('estilo')
+    else:
+        bandas = Banda.objects.all().select_related('estilo')
+    return render(request, 'mantenedores/bandas_lista.html', {'bandas': bandas, 'query': query})
+
+@login_required
+@rol_requerido(['Administrador', 'Supervisor'])
+def crear_banda(request):
+    if request.method == 'POST':
+        form = BandaForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Banda creada correctamente.')
+            return redirect('bandas_lista')
+    else:
+        form = BandaForm()
+    return render(request, 'mantenedores/banda_form.html', {'form': form, 'titulo': 'Nueva Banda'})
+
+@login_required
+@rol_requerido(['Administrador', 'Supervisor'])
+def editar_banda(request, pk):
+    banda = get_object_or_404(Banda, pk=pk)
+    if request.method == 'POST':
+        form = BandaForm(request.POST, instance=banda)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Banda actualizada con éxito.')
+            return redirect('bandas_lista')
+    else:
+        form = BandaForm(instance=banda)
+    return render(request, 'mantenedores/banda_form.html', {'form': form, 'titulo': 'Modificar Banda'})
+
+@login_required
+@rol_requerido(['Administrador'])
+def eliminar_banda(request, pk):
+    banda = get_object_or_404(Banda, pk=pk)
+    if request.method == 'POST':
+        banda.delete()
+        messages.success(request, 'Banda eliminada correctamente.')
+        return redirect('bandas_lista')
+    return render(request, 'mantenedores/confirmar_eliminar.html', {'objeto': banda.nombre, 'volver': 'bandas_lista'})
+
+# --- MANTENEDOR 2: TARIFAS (CRUD) ---
+@login_required
+@rol_requerido(['Administrador', 'Supervisor', 'Administrativo'])
+def lista_tarifas(request):
+    tarifas = TarifaRocola.objects.all()
+    return render(request, 'mantenedores/tarifas_lista.html', {'tarifas': tarifas})
+
+@login_required
+@rol_requerido(['Administrador'])
+def crear_tarifa(request):
+    if request.method == 'POST':
+        form = TarifaForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Tarifa registrada con éxito.')
+            return redirect('tarifas_lista')
+    else:
+        form = TarifaForm()
+    return render(request, 'mantenedores/tarifa_form.html', {'form': form, 'titulo': 'Nueva Tarifa'})
+
+@login_required
+@rol_requerido(['Administrador'])
+def editar_tarifa(request, pk):
+    tarifa = get_object_or_404(TarifaRocola, pk=pk)
+    if request.method == 'POST':
+        form = TarifaForm(request.POST, instance=tarifa)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Tarifa actualizada correctamente.')
+            return redirect('tarifas_lista')
+    else:
+        form = TarifaForm(instance=tarifa)
+    return render(request, 'mantenedores/tarifa_form.html', {'form': form, 'titulo': 'Modificar Tarifa'})
+
+@login_required
+@rol_requerido(['Administrador'])
+def eliminar_tarifa(request, pk):
+    tarifa = get_object_or_404(TarifaRocola, pk=pk)
+    if request.method == 'POST':
+        tarifa.delete()
+        messages.success(request, 'Tarifa eliminada con éxito.')
+        return redirect('tarifas_lista')
+    return render(request, 'mantenedores/confirmar_eliminar.html', {'objeto': tarifa.modo_reproduccion, 'volver': 'tarifas_lista'})
+
+# --- TRANSACCIÓN OPERACIONAL ---
+@login_required
+def transaccion_ticket(request):
+    if request.method == 'POST':
+        form = TicketForm(request.POST)
+        if form.is_valid():
+            ticket = form.save(commit=False)
+            ticket.usuario = request.user
+            ticket.codigo_ticket = f"ROC-{uuid.uuid4().hex[:6].upper()}"
+            ticket.monto_cobrado = ticket.tarifa.precio_base
+            ticket.save()
+            messages.success(request, f'Transacción exitosa: Ticket #{ticket.codigo_ticket} emitido.')
+            return redirect('dashboard')
+    else:
+        form = TicketForm()
+    return render(request, 'transacciones/nuevo_ticket.html', {'form': form})

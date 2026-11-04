@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="mb-4">
+    <h2 class="fw-bold">Panel Principal</h2>
+    <p class="text-muted">
+        Nivel de acceso activo: 
+        {% if es_admin %}
+            <span class="badge bg-danger fs-6">Administrador (Acceso Total)</span>
+        {% elif es_supervisor %}
+            <span class="badge bg-primary fs-6">Supervisor (Gestión Operacional)</span>
+        {% else %}
+            <span class="badge bg-info text-dark fs-6">Administrativo (Consultas y Transacciones)</span>
+        {% endif %}
+    </p>
+</div>
+
+<!-- Tarjetas de Métricas -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card text-white bg-dark shadow-sm">
+            <div class="card-body">
+                <h6 class="card-title text-uppercase">Bandas</h6>
+                <h2 class="fw-bold">{{ metricas.total_bandas }}</h2>
+                <a href="{% url 'bandas_lista' %}" class="text-white-50 small text-decoration-none">Ver catálogo &rarr;</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-secondary shadow-sm">
+            <div class="card-body">
+                <h6 class="card-title text-uppercase">Tarifas Registradas</h6>
+                <h2 class="fw-bold">{{ metricas.total_tarifas }}</h2>
+                <a href="{% url 'tarifas_lista' %}" class="text-white-50 small text-decoration-none">Ver tarifas &rarr;</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-success shadow-sm">
+            <div class="card-body">
+                <h6 class="card-title text-uppercase">Transacciones Emitidas</h6>
+                <h2 class="fw-bold">{{ metricas.total_tickets }}</h2>
+                <a href="{% url 'transaccion_ticket' %}" class="text-white-50 small text-decoration-none">Nueva orden &rarr;</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-info shadow-sm">
+            <div class="card-body">
+                <h6 class="card-title text-uppercase">Tarifa Promedio</h6>
+                <h2 class="fw-bold">${{ metricas.promedio_tarifa|floatformat:0 }}</h2>
+                <span class="small text-white-50">Cálculo ORM</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Acciones Diferenciadas por Perfil -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white py-3">
+        <h5 class="mb-0 fw-bold">Módulos Disponibles para tu Rol</h5>
+    </div>
+    <div class="card-body">
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{% url 'transaccion_ticket' %}" class="btn btn-warning">⚡ Registrar Nueva Transacción</a>
+            <a href="{% url 'tarifas_lista' %}" class="btn btn-outline-secondary">📋 Ver Tarifas</a>
+
+            {% if es_admin or es_supervisor %}
+                <a href="{% url 'bandas_lista' %}" class="btn btn-outline-primary">🎸 Mantenedor de Bandas</a>
+                <a href="{% url 'crear_banda' %}" class="btn btn-primary">+ Nueva Banda</a>
+            {% endif %}
+
+            {% if es_admin %}
+                <a href="{% url 'crear_tarifa' %}" class="btn btn-dark">+ Nueva Tarifa (Solo Admin)</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Registro de Transacciones Operacionales Recientes -->
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold">Últimas Transacciones Operacionales (Tickets)</h5>
+        <a href="{% url 'transaccion_ticket' %}" class="btn btn-sm btn-outline-success">+ Nueva</a>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Código</th>
+                        <th>Canción</th>
+                        <th>Tarifa</th>
+                        <th>Monto</th>
+                        <th>Usuario</th>
+                        <th>Fecha</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ticket in tickets_recientes %}
+                    <tr>
+                        <td><strong>{{ ticket.codigo_ticket }}</strong></td>
+                        <td>{{ ticket.cancion.titulo }} ({{ ticket.cancion.banda.nombre }})</td>
+                        <td>{{ ticket.tarifa.modo_reproduccion }}</td>
+                        <td>${{ ticket.monto_cobrado|floatformat:0 }}</td>
+                        <td>{{ ticket.usuario.username }}</td>
+                        <td>{{ ticket.fecha_solicitud|date:"d/m/Y H:i" }}</td>
+                        <td><span class="badge bg-success">{{ ticket.estado }}</span></td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">Aún no hay transacciones operacionales registradas.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

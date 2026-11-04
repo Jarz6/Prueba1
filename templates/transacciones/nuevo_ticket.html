@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-warning text-dark py-3">
+                <h5 class="mb-0 fw-bold">⚡ Nueva Transacción Operacional: Ticket de Reproducción</h5>
+            </div>
+            <div class="card-body p-4">
+                <p class="text-muted small">
+                    Esta operación vincula la entidad <strong>Canción</strong> con la <strong>Tarifa</strong> seleccionada y el <strong>Usuario</strong> autenticado en sesión.
+                </p>
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Seleccionar Canción:</label>
+                        {{ form.cancion }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Seleccionar Tarifa de Reproducción:</label>
+                        {{ form.tarifa }}
+                    </div>
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{% url 'dashboard' %}" class="btn btn-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-success">Confirmar y Emitir Ticket</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

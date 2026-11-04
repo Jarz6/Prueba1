@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold">🎸 Mantenedor de Bandas</h2>
+    {% if user.is_superuser or 'Administrador' in user.groups.all.0.name or 'Supervisor' in user.groups.all.0.name %}
+        <a href="{% url 'crear_banda' %}" class="btn btn-primary">+ Nueva Banda</a>
+    {% endif %}
+</div>
+
+<!-- Barra de Búsqueda -->
+<form method="GET" class="row g-2 mb-4">
+    <div class="col-md-6">
+        <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Buscar banda por nombre o álbum...">
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-dark w-100">Buscar</button>
+    </div>
+</form>
+
+<div class="card shadow-sm border-0">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Nombre</th>
+                    <th>Álbum</th>
+                    <th>Estilo</th>
+                    <th>Imagen</th>
+                    <th class="text-end">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for banda in bandas %}
+                <tr>
+                    <td class="fw-bold">{{ banda.nombre }}</td>
+                    <td>{{ banda.album }}</td>
+                    <td><span class="badge bg-secondary">{{ banda.estilo.nombre }}</span></td>
+                    <td><code>{{ banda.imagen }}</code></td>
+                    <td class="text-end">
+                        <a href="{% url 'editar_banda' banda.id %}" class="btn btn-sm btn-outline-warning">Modificar</a>
+                        {% if user.is_superuser or 'Administrador' in user.groups.all.0.name %}
+                            <a href="{% url 'eliminar_banda' banda.id %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center py-4 text-muted">No se encontraron bandas registradas.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
