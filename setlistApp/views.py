@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q, Avg
 from django.db.models import Count
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import User, Group
 from django.core.mail import send_mail
 from django.conf import settings
 
