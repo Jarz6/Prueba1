@@ -1,6 +1,22 @@
 from django import forms
-from .models import Banda, Cancion
+from .models import Banda, Cancion, Estilo
 from cobrosApp.models import TarifaRocola, TicketReproduccion
+
+class EstiloForm(forms.ModelForm):
+    class Meta:
+        model = Estilo
+        fields = ['nombre']
+        widgets = {
+            'nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: Heavy Metal, Indie Rock'}),
+        }
+
+class CancionForm(forms.ModelForm):
+    class Meta:
+        model = Cancion
+        fields = ['titulo']
+        widgets = {
+            'titulo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Título de la pista'}),
+        }
 
 class BandaForm(forms.ModelForm):
     class Meta:

@@ -31,4 +31,11 @@ urlpatterns = [
 
     # Transacción Operacional
     path('transacciones/ticket/', views.transaccion_ticket, name='transaccion_ticket'),
+    
+    # Canciones asociadas a una Banda
+    path('bandas/<int:pk>/canciones/', views.detalle_canciones_banda, name='detalle_canciones_banda'),
+    path('canciones/eliminar/<int:pk>/', views.eliminar_cancion, name='eliminar_cancion'),
+
+    # Crear Género / Estilo
+    path('estilos/crear/', views.crear_estilo, name='crear_estilo'),
 ]

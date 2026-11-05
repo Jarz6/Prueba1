@@ -9,6 +9,7 @@ from .models import Banda, Cancion, Estilo
 from .forms import BandaForm, TarifaForm, TicketForm
 from .decorators import rol_requerido
 from cobrosApp.models import TarifaRocola, TicketReproduccion
+from .forms import BandaForm, TarifaForm, TicketForm, CancionForm, EstiloForm
 
 # --- AUTENTICACIÓN PROPIA ---
 def login_view(request):
@@ -163,3 +164,59 @@ def transaccion_ticket(request):
     else:
         form = TicketForm()
     return render(request, 'transacciones/nuevo_ticket.html', {'form': form})
+
+# --- GESTIÓN DE CANCIONES DENTRO DE UNA BANDA ---
+@login_required
+@rol_requerido(['Administrador', 'Supervisor'])
+def detalle_canciones_banda(request, pk):
+    """Permite ver el setlist y agregar canciones a una banda específica."""
+    banda = get_object_or_404(Banda, pk=pk)
+    canciones = banda.canciones.all()
+
+    if request.method == 'POST':
+        form = CancionForm(request.POST)
+        if form.is_valid():
+            nueva_cancion = form.save(commit=False)
+            nueva_cancion.banda = banda
+            nueva_cancion.save()
+            messages.success(request, f'Pista "{nueva_cancion.titulo}" agregada con éxito al álbum {banda.album}.')
+            return redirect('detalle_canciones_banda', pk=banda.id)
+    else:
+        form = CancionForm()
+
+    return render(request, 'mantenedores/banda_canciones.html', {
+        'banda': banda,
+        'canciones': canciones,
+        'form': form,
+    })
+
+@login_required
+@rol_requerido(['Administrador', 'Supervisor'])
+def eliminar_cancion(request, pk):
+    """Permite quitar una canción de una banda."""
+    cancion = get_object_or_404(Cancion, pk=pk)
+    banda_id = cancion.banda.id
+    if request.method == 'POST':
+        cancion.delete()
+        messages.success(request, 'Canción eliminada del repertorio.')
+        return redirect('detalle_canciones_banda', pk=banda_id)
+    return render(request, 'mantenedores/confirmar_eliminar.html', {
+        'objeto': f'Canción: {cancion.titulo}',
+        'volver': 'bandas_lista',
+    })
+
+# --- CREACIÓN RÁPIDA DE GÉNERO / ESTILO ---
+@login_required
+@rol_requerido(['Administrador', 'Supervisor'])
+def crear_estilo(request):
+    """Permite registrar un nuevo género/estilo musical y volver a la creación de banda."""
+    next_url = request.GET.get('next', 'crear_banda')
+    if request.method == 'POST':
+        form = EstiloForm(request.POST)
+        if form.is_valid():
+            estilo = form.save()
+            messages.success(request, f'Género "{estilo.nombre}" creado exitosamente.')
+            return redirect(next_url)
+    else:
+        form = EstiloForm()
+    return render(request, 'mantenedores/estilo_form.html', {'form': form, 'next_url': next_url})
