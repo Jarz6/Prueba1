@@ -65,10 +65,13 @@ def lista_bandas(request):
     if query:
         bandas = Banda.objects.filter(
             Q(nombre__icontains=query) | Q(album__icontains=query)
-        ).select_related('estilo').annotate(num_canciones=Count('cancion'))
+        ).select_related('estilo').annotate(num_canciones=Count('repertorio'))
     else:
-        bandas = Banda.objects.all().select_related('estilo').annotate(num_canciones=Count('cancion'))
+        bandas = Banda.objects.all().select_related('estilo').annotate(num_canciones=Count('repertorio'))
     return render(request, 'mantenedores/bandas_lista.html', {'bandas': bandas, 'query': query})
+
+
+
 @login_required
 @rol_requerido(['Administrador', 'Supervisor'])
 def crear_banda(request):
@@ -174,8 +177,8 @@ def detalle_canciones_banda(request, pk):
     """Permite ver el setlist y agregar canciones a una banda específica."""
     banda = get_object_or_404(Banda, pk=pk)
     
-    # Consulta directa al modelo Cancion filtrando por la banda
-    canciones = Cancion.objects.filter(banda=banda)
+    # Usar la relación directa 'repertorio'
+    canciones = banda.repertorio.all()
 
     if request.method == 'POST':
         form = CancionForm(request.POST)
