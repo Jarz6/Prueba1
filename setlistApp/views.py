@@ -171,7 +171,8 @@ def transaccion_ticket(request):
 def detalle_canciones_banda(request, pk):
     """Permite ver el setlist y agregar canciones a una banda específica."""
     banda = get_object_or_404(Banda, pk=pk)
-    canciones = banda.canciones.all()
+    # Cambio aquí: usar cancion_set.all()
+    canciones = banda.cancion_set.all()
 
     if request.method == 'POST':
         form = CancionForm(request.POST)

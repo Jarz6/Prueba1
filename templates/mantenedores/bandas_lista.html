@@ -2,7 +2,7 @@
 {% load static %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold">🎸 Mantenedor de Bandas</h2>
+    <h2 class="fw-bold"> Mantenedor de Bandas</h2>
     {% if user.is_superuser or 'Administrador' in user.groups.all.0.name or 'Supervisor' in user.groups.all.0.name %}
         <a href="{% url 'crear_banda' %}" class="btn btn-primary">+ Nueva Banda</a>
     {% endif %}
@@ -57,7 +57,7 @@
                     <td class="text-end">
                         <!-- Botón para ver y gestionar canciones del álbum -->
                         <a href="{% url 'detalle_canciones_banda' banda.id %}" class="btn btn-sm btn-outline-info me-1">
-                            🎵 Canciones ({{ banda.canciones.count }})
+                            Canciones ({{ banda.cancion_set.count }})
                         </a>
                         <a href="{% url 'editar_banda' banda.id %}" class="btn btn-sm btn-outline-warning">Modificar</a>
                         {% if user.is_superuser or 'Administrador' in user.groups.all.0.name %}
