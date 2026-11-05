@@ -45,6 +45,9 @@
                         <a class="btn btn-outline-danger btn-sm" href="{% url 'logout' %}">Cerrar Sesión</a>
                     </li>
                 {% else %}
+                    <li class="nav-item me-2">
+                        <a class="btn btn-outline-light btn-sm" href="{% url 'registro' %}">Registrarse</a>
+                    </li>
                     <li class="nav-item">
                         <a class="btn btn-primary btn-sm" href="{% url 'login' %}">Iniciar Sesión</a>
                     </li>

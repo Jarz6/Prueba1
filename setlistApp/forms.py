@@ -1,6 +1,8 @@
 from django import forms
 from .models import Banda, Cancion, Estilo
 from cobrosApp.models import TarifaRocola, TicketReproduccion
+from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm
 
 class EstiloForm(forms.ModelForm):
     class Meta:
@@ -59,3 +61,22 @@ class TicketForm(forms.ModelForm):
         if cancion and banda:
             raise forms.ValidationError("Por favor selecciona solo una opción: o una Canción individual o un Álbum completo.")
         return cleaned_data
+
+class RegistroUsuarioForm(UserCreationForm):
+    email = forms.EmailField(
+        required=True,
+        widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'ejemplo@correo.cl'})
+    )
+
+    class Meta:
+        model = User
+        fields = ['username', 'email']
+        widgets = {
+            'username': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre de usuario'}),
+        }
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError("Este correo ya se encuentra registrado.")
+        return email

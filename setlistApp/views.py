@@ -5,7 +5,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q, Avg
 from django.db.models import Count
+from django.contrib.auth.models import Group
 
+from .forms import BandaForm, TarifaForm, TicketForm, CancionForm, EstiloForm, RegistroUsuarioForm
 from .models import Banda, Cancion, Estilo
 from .forms import BandaForm, TarifaForm, TicketForm
 from .decorators import rol_requerido
@@ -228,3 +230,26 @@ def crear_estilo(request):
     else:
         form = EstiloForm()
     return render(request, 'mantenedores/estilo_form.html', {'form': form, 'next_url': next_url})
+
+
+# --- REGISTRO DE USUARIOS ---
+def registro_view(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+
+    if request.method == 'POST':
+        form = RegistroUsuarioForm(request.POST)
+        if form.is_valid():
+            nuevo_usuario = form.save()
+            
+            # Asignar automáticamente el rol base: Administrativo
+            grupo_administrativo, _ = Group.objects.get_or_create(name='Administrativo')
+            nuevo_usuario.groups.add(grupo_administrativo)
+            
+            login(request, nuevo_usuario)
+            messages.success(request, f'¡Cuenta creada exitosamente! Bienvenido {nuevo_usuario.username}.')
+            return redirect('dashboard')
+    else:
+        form = RegistroUsuarioForm()
+
+    return render(request, 'auth/registro.html', {'form': form})

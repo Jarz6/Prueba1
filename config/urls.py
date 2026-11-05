@@ -38,4 +38,9 @@ urlpatterns = [
 
     # Crear Género / Estilo
     path('estilos/crear/', views.crear_estilo, name='crear_estilo'),
+
+    # Autenticación y Registro
+    path('login/', views.login_view, name='login'),
+    path('registro/', views.registro_view, name='registro'),
+    path('logout/', views.logout_view, name='logout'),
 ]
