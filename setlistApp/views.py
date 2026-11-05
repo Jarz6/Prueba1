@@ -4,6 +4,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q, Avg
+from django.db.models import Count
 
 from .models import Banda, Cancion, Estilo
 from .forms import BandaForm, TarifaForm, TicketForm
@@ -62,11 +63,12 @@ def dashboard_view(request):
 def lista_bandas(request):
     query = request.GET.get('q', '')
     if query:
-        bandas = Banda.objects.filter(Q(nombre__icontains=query) | Q(album__icontains=query)).select_related('estilo')
+        bandas = Banda.objects.filter(
+            Q(nombre__icontains=query) | Q(album__icontains=query)
+        ).select_related('estilo').annotate(num_canciones=Count('cancion'))
     else:
-        bandas = Banda.objects.all().select_related('estilo')
+        bandas = Banda.objects.all().select_related('estilo').annotate(num_canciones=Count('cancion'))
     return render(request, 'mantenedores/bandas_lista.html', {'bandas': bandas, 'query': query})
-
 @login_required
 @rol_requerido(['Administrador', 'Supervisor'])
 def crear_banda(request):
@@ -171,8 +173,9 @@ def transaccion_ticket(request):
 def detalle_canciones_banda(request, pk):
     """Permite ver el setlist y agregar canciones a una banda específica."""
     banda = get_object_or_404(Banda, pk=pk)
-    # Cambio aquí: usar cancion_set.all()
-    canciones = banda.cancion_set.all()
+    
+    # Consulta directa al modelo Cancion filtrando por la banda
+    canciones = Cancion.objects.filter(banda=banda)
 
     if request.method == 'POST':
         form = CancionForm(request.POST)
@@ -190,6 +193,7 @@ def detalle_canciones_banda(request, pk):
         'canciones': canciones,
         'form': form,
     })
+
 
 @login_required
 @rol_requerido(['Administrador', 'Supervisor'])

@@ -57,7 +57,7 @@
                     <td class="text-end">
                         <!-- Botón para ver y gestionar canciones del álbum -->
                         <a href="{% url 'detalle_canciones_banda' banda.id %}" class="btn btn-sm btn-outline-info me-1">
-                            Canciones ({{ banda.cancion_set.count }})
+                            Canciones ({{ banda.num_canciones|default:0 }})
                         </a>
                         <a href="{% url 'editar_banda' banda.id %}" class="btn btn-sm btn-outline-warning">Modificar</a>
                         {% if user.is_superuser or 'Administrador' in user.groups.all.0.name %}
