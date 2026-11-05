@@ -98,3 +98,39 @@ class RegistroUsuarioForm(UserCreationForm):
         if User.objects.filter(email=email).exists():
             raise forms.ValidationError("Este correo ya se encuentra registrado.")
         return email
+
+class SolicitarCodigoForm(forms.Form):
+    email = forms.EmailField(
+        label="Correo Electrónico",
+        widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'ejemplo@correo.cl'})
+    )
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if not User.objects.filter(email=email).exists():
+            raise forms.ValidationError("No existe ningún usuario registrado con este correo.")
+        return email
+
+class VerificarCodigoYCambiarClaveForm(forms.Form):
+    codigo = forms.CharField(
+        max_length=6,
+        min_length=6,
+        label="Código de Seguridad (6 dígitos)",
+        widget=forms.TextInput(attrs={'class': 'form-control text-center fs-4', 'placeholder': '123456', 'maxlength': '6'})
+    )
+    nueva_clave = forms.CharField(
+        label="Nueva Contraseña",
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Nueva contraseña'})
+    )
+    confirmar_clave = forms.CharField(
+        label="Confirmar Nueva Contraseña",
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Repite la contraseña'})
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        clave1 = cleaned_data.get('nueva_clave')
+        clave2 = cleaned_data.get('confirmar_clave')
+        if clave1 and clave2 and clave1 != clave2:
+            raise forms.ValidationError("Las contraseñas no coinciden.")
+        return cleaned_data

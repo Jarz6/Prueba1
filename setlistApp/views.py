@@ -1,4 +1,5 @@
 import uuid
+import random
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -6,8 +7,10 @@ from django.contrib import messages
 from django.db.models import Q, Avg
 from django.db.models import Count
 from django.contrib.auth.models import Group
+from django.core.mail import send_mail
+from django.conf import settings
 
-from .forms import BandaForm, TarifaForm, TicketForm, CancionForm, EstiloForm, RegistroUsuarioForm
+from .forms import BandaForm, TarifaForm, TicketForm, CancionForm, EstiloForm, RegistroUsuarioForm, SolicitarCodigoForm, VerificarCodigoYCambiarClaveForm
 from .models import Banda, Cancion, Estilo
 from .forms import BandaForm, TarifaForm, TicketForm
 from .decorators import rol_requerido
@@ -257,3 +260,83 @@ def registro_view(request):
         form = RegistroUsuarioForm()
 
     return render(request, 'auth/registro.html', {'form': form})
+
+
+# --- RECUPERACIÓN POR CÓDIGO DE SEGURIDAD (OTP) ---
+def recuperar_solicitar_view(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+
+    if request.method == 'POST':
+        form = SolicitarCodigoForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            user = User.objects.get(email=email)
+            
+            # Generar código aleatorio de 6 dígitos
+            codigo = str(random.randint(100000, 999999))
+            
+            # Guardar en sesión de Django
+            request.session['reset_codigo'] = codigo
+            request.session['reset_user_id'] = user.id
+
+            asunto = "Código de recuperación - Rocola Virtual"
+            mensaje = f"""Hola {user.username},
+
+Tu código de verificación para restablecer tu contraseña es:
+
+{codigo} 
+
+Ingresa este código de 6 dígitos en la aplicación para definir tu nueva contraseña.
+"""
+            try:
+                send_mail(
+                    asunto,
+                    mensaje,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [email],
+                    fail_silently=False,
+                )
+                messages.info(request, f'Hemos enviado un código de 6 dígitos a {email}.')
+                return redirect('recuperar_verificar')
+            except Exception as e:
+                # Si SMTP falla, dejamos el código en la consola del servidor por respaldo
+                print(f"\n[BACKUP EN TERMINAL] Código de recuperación generado: {codigo} para {user.username}\n")
+                messages.error(request, f'Error al conectar con el servidor de correo: {e}')
+    else:
+        form = SolicitarCodigoForm()
+
+    return render(request, 'auth/password_reset.html', {'form': form})
+
+def recuperar_verificar_view(request):
+    codigo_sesion = request.session.get('reset_codigo')
+    user_id_sesion = request.session.get('reset_user_id')
+
+    # Si no ha pedido código antes, devolver al inicio de la solicitud
+    if not codigo_sesion or not user_id_sesion:
+        messages.warning(request, 'Primero solicita tu código de verificación.')
+        return redirect('password_reset')
+
+    if request.method == 'POST':
+        form = VerificarCodigoYCambiarClaveForm(request.POST)
+        if form.is_valid():
+            codigo_ingresado = form.cleaned_data['codigo']
+            nueva_clave = form.cleaned_data['nueva_clave']
+
+            if codigo_ingresado == codigo_sesion:
+                user = get_object_or_404(User, id=user_id_sesion)
+                user.set_password(nueva_clave)
+                user.save()
+
+                # Limpiar datos de la sesión
+                del request.session['reset_codigo']
+                del request.session['reset_user_id']
+
+                messages.success(request, '¡Contraseña actualizada exitosamente! Ya puedes iniciar sesión.')
+                return redirect('login')
+            else:
+                messages.error(request, 'El código ingresado es incorrecto.')
+    else:
+        form = VerificarCodigoYCambiarClaveForm()
+
+    return render(request, 'auth/password_reset_confirm.html', {'form': form})

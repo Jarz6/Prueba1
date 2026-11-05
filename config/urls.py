@@ -1,5 +1,4 @@
 from django.urls import path
-from django.contrib.auth import views as auth_views
 from setlistApp import views
 
 urlpatterns = [
@@ -7,15 +6,14 @@ urlpatterns = [
     path('', views.dashboard_view, name='home'),
     path('dashboard/', views.dashboard_view, name='dashboard'),
 
-    # Autenticación Propia
+    # Autenticación y Registro
     path('login/', views.login_view, name='login'),
+    path('registro/', views.registro_view, name='registro'),
     path('logout/', views.logout_view, name='logout'),
 
-    # Recuperación de Contraseña mediante Correo
-    path('password_reset/', auth_views.PasswordResetView.as_view(template_name='auth/password_reset.html'), name='password_reset'),
-    path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(template_name='auth/password_reset_done.html'), name='password_reset_done'),
-    path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(template_name='auth/password_reset_confirm.html'), name='password_reset_confirm'),
-    path('reset/done/', auth_views.PasswordResetCompleteView.as_view(template_name='auth/password_reset_complete.html'), name='password_reset_complete'),
+    # Recuperación de Contraseña mediante Código de Seguridad (OTP)
+    path('recuperar/', views.recuperar_solicitar_view, name='password_reset'),
+    path('recuperar/verificar/', views.recuperar_verificar_view, name='recuperar_verificar'),
 
     # Mantenedor 1: Bandas
     path('bandas/', views.lista_bandas, name='bandas_lista'),
@@ -31,16 +29,11 @@ urlpatterns = [
 
     # Transacción Operacional
     path('transacciones/ticket/', views.transaccion_ticket, name='transaccion_ticket'),
-    
+
     # Canciones asociadas a una Banda
     path('bandas/<int:pk>/canciones/', views.detalle_canciones_banda, name='detalle_canciones_banda'),
     path('canciones/eliminar/<int:pk>/', views.eliminar_cancion, name='eliminar_cancion'),
 
     # Crear Género / Estilo
     path('estilos/crear/', views.crear_estilo, name='crear_estilo'),
-
-    # Autenticación y Registro
-    path('login/', views.login_view, name='login'),
-    path('registro/', views.registro_view, name='registro'),
-    path('logout/', views.logout_view, name='logout'),
 ]
