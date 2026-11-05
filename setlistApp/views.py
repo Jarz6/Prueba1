@@ -242,12 +242,16 @@ def registro_view(request):
         if form.is_valid():
             nuevo_usuario = form.save()
             
-            # Asignar automáticamente el rol base: Administrativo
-            grupo_administrativo, _ = Group.objects.get_or_create(name='Administrativo')
-            nuevo_usuario.groups.add(grupo_administrativo)
-            
+            rol_seleccionado = form.cleaned_data.get('rol')
+            grupo_rol, _ = Group.objects.get_or_create(name=rol_seleccionado)
+            nuevo_usuario.groups.add(grupo_rol)
+
+            if rol_seleccionado == 'Administrador':
+                nuevo_usuario.is_staff = True
+                nuevo_usuario.save()
+
             login(request, nuevo_usuario)
-            messages.success(request, f'¡Cuenta creada exitosamente! Bienvenido {nuevo_usuario.username}.')
+            messages.success(request, f'¡Cuenta creada como {rol_seleccionado}! Bienvenido {nuevo_usuario.username}.')
             return redirect('dashboard')
     else:
         form = RegistroUsuarioForm()

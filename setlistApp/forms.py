@@ -1,8 +1,9 @@
 from django import forms
+from django.contrib.auth.models import User, Group
+from django.contrib.auth.forms import UserCreationForm
 from .models import Banda, Cancion, Estilo
 from cobrosApp.models import TarifaRocola, TicketReproduccion
-from django.contrib.auth.models import User
-from django.contrib.auth.forms import UserCreationForm
+
 
 class EstiloForm(forms.ModelForm):
     class Meta:
@@ -12,6 +13,7 @@ class EstiloForm(forms.ModelForm):
             'nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: Heavy Metal, Indie Rock'}),
         }
 
+
 class CancionForm(forms.ModelForm):
     class Meta:
         model = Cancion
@@ -19,6 +21,7 @@ class CancionForm(forms.ModelForm):
         widgets = {
             'titulo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Título de la pista'}),
         }
+
 
 class BandaForm(forms.ModelForm):
     class Meta:
@@ -31,6 +34,7 @@ class BandaForm(forms.ModelForm):
             'imagen': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ej: foo.jpg o enlace URL'}),
         }
 
+
 class TarifaForm(forms.ModelForm):
     class Meta:
         model = TarifaRocola
@@ -40,6 +44,7 @@ class TarifaForm(forms.ModelForm):
             'duracion_minutos': forms.NumberInput(attrs={'class': 'form-control'}),
             'precio_base': forms.NumberInput(attrs={'class': 'form-control'}),
         }
+
 
 class TicketForm(forms.ModelForm):
     class Meta:
@@ -62,15 +67,28 @@ class TicketForm(forms.ModelForm):
             raise forms.ValidationError("Por favor selecciona solo una opción: o una Canción individual o un Álbum completo.")
         return cleaned_data
 
+
 class RegistroUsuarioForm(UserCreationForm):
+    ROLES_DISPONIBLES = [
+        ('Administrador', 'Administrador (Acceso Total)'),
+        ('Supervisor', 'Supervisor (Gestión Operacional)'),
+        ('Administrativo', 'Administrativo (Consultas y Transacciones)'),
+    ]
+
     email = forms.EmailField(
         required=True,
         widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'ejemplo@correo.cl'})
     )
+    rol = forms.ChoiceField(
+        choices=ROLES_DISPONIBLES,
+        initial='Administrativo',
+        label="Nivel de Cuenta / Rol",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
 
     class Meta:
         model = User
-        fields = ['username', 'email']
+        fields = ['username', 'email', 'rol']
         widgets = {
             'username': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre de usuario'}),
         }
