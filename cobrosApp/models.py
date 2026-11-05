@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from setlistApp.models import Cancion
+from setlistApp.models import Banda, Cancion
 
 class TarifaRocola(models.Model):
     modo_reproduccion = models.CharField(max_length=100, verbose_name="Modo de Reproducción")
@@ -11,7 +11,6 @@ class TarifaRocola(models.Model):
         return f"{self.modo_reproduccion} - ${self.precio_base}"
 
 class TicketReproduccion(models.Model):
-    """Transacción operacional: relaciona Usuario, Canción y Tarifa."""
     ESTADOS = [
         ('PENDIENTE', 'Pendiente en Cola'),
         ('REPRODUCIENDO', 'En Reproducción'),
@@ -20,7 +19,9 @@ class TicketReproduccion(models.Model):
     ]
 
     codigo_ticket = models.CharField(max_length=20, unique=True, verbose_name="Código")
-    cancion = models.ForeignKey(Cancion, on_delete=models.CASCADE, related_name="tickets")
+    # Ahora permite seleccionar Canción O Banda/Álbum
+    cancion = models.ForeignKey(Cancion, on_delete=models.CASCADE, related_name="tickets", null=True, blank=True)
+    banda = models.ForeignKey(Banda, on_delete=models.CASCADE, related_name="tickets", null=True, blank=True, verbose_name="Álbum / Banda")
     tarifa = models.ForeignKey(TarifaRocola, on_delete=models.PROTECT, related_name="tickets")
     usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name="tickets")
     fecha_solicitud = models.DateTimeField(auto_now_add=True)
@@ -28,4 +29,5 @@ class TicketReproduccion(models.Model):
     estado = models.CharField(max_length=20, choices=ESTADOS, default='PENDIENTE')
 
     def __str__(self):
-        return f"Ticket #{self.codigo_ticket} - {self.cancion.titulo} ({self.usuario.username})"
+        item = self.cancion.titulo if self.cancion else f"Álbum: {self.banda.album}"
+        return f"Ticket #{self.codigo_ticket} - {item} ({self.usuario.username})"

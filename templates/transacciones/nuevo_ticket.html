@@ -4,22 +4,41 @@
     <div class="col-md-6">
         <div class="card shadow-sm border-0">
             <div class="card-header bg-warning text-dark py-3">
-                <h5 class="mb-0 fw-bold">⚡ Nueva Transacción Operacional: Ticket de Reproducción</h5>
+                <h5 class="mb-0 fw-bold">⚡ Nueva Transacción: Ticket de Reproducción</h5>
             </div>
             <div class="card-body p-4">
                 <p class="text-muted small">
-                    Esta operación vincula la entidad <strong>Canción</strong> con la <strong>Tarifa</strong> seleccionada y el <strong>Usuario</strong> autenticado en sesión.
+                    Selecciona una <strong>Tarifa</strong> y elige si deseas reproducir una <strong>Canción individual</strong> o un <strong>Álbum completo</strong>.
                 </p>
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger py-2">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
                 <form method="POST">
                     {% csrf_token %}
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Seleccionar Canción:</label>
-                        {{ form.cancion }}
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Seleccionar Tarifa de Reproducción:</label>
+                        <label class="form-label fw-semibold">Tarifa de Reproducción:</label>
                         {{ form.tarifa }}
+                        {{ form.tarifa.errors }}
                     </div>
+
+                    <div class="card bg-light p-3 mb-3 border">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Opción 1: Reproducir Canción Individual</label>
+                            {{ form.cancion }}
+                            <div class="form-text">Elige una pista individual de la rocola.</div>
+                        </div>
+                        <div class="text-center fw-bold text-muted my-1">— O BIEN —</div>
+                        <div class="mb-2">
+                            <label class="form-label fw-semibold">Opción 2: Reproducir Álbum Completo (Banda)</label>
+                            {{ form.banda }}
+                            <div class="form-text">Elige reproducir todo el álbum seleccionado.</div>
+                        </div>
+                    </div>
+
                     <div class="d-flex justify-content-between mt-4">
                         <a href="{% url 'dashboard' %}" class="btn btn-secondary">Cancelar</a>
                         <button type="submit" class="btn btn-success">Confirmar y Emitir Ticket</button>

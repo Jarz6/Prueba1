@@ -10,7 +10,7 @@ class BandaForm(forms.ModelForm):
             'nombre': forms.TextInput(attrs={'class': 'form-control'}),
             'album': forms.TextInput(attrs={'class': 'form-control'}),
             'estilo': forms.Select(attrs={'class': 'form-select'}),
-            'imagen': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ej: foo.jpg'}),
+            'imagen': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ej: foo.jpg o enlace URL'}),
         }
 
 class TarifaForm(forms.ModelForm):
@@ -26,8 +26,20 @@ class TarifaForm(forms.ModelForm):
 class TicketForm(forms.ModelForm):
     class Meta:
         model = TicketReproduccion
-        fields = ['cancion', 'tarifa']
+        fields = ['tarifa', 'cancion', 'banda']
         widgets = {
-            'cancion': forms.Select(attrs={'class': 'form-select'}),
             'tarifa': forms.Select(attrs={'class': 'form-select'}),
+            'cancion': forms.Select(attrs={'class': 'form-select'}),
+            'banda': forms.Select(attrs={'class': 'form-select'}),
         }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        cancion = cleaned_data.get('cancion')
+        banda = cleaned_data.get('banda')
+
+        if not cancion and not banda:
+            raise forms.ValidationError("Debes seleccionar una Canción O un Álbum para la reproducción.")
+        if cancion and banda:
+            raise forms.ValidationError("Por favor selecciona solo una opción: o una Canción individual o un Álbum completo.")
+        return cleaned_data

@@ -3,13 +3,13 @@
 <div class="mb-4">
     <h2 class="fw-bold">Panel Principal</h2>
     <p class="text-muted">
-        Nivel de acceso activo: 
+        Nivel de acceso activo:
         {% if es_admin %}
-            <span class="badge bg-danger fs-6">Administrador (Acceso Total)</span>
+        <span class="badge bg-danger fs-6">Administrador (Acceso Total)</span>
         {% elif es_supervisor %}
-            <span class="badge bg-primary fs-6">Supervisor (Gestión Operacional)</span>
+        <span class="badge bg-primary fs-6">Supervisor (Gestión Operacional)</span>
         {% else %}
-            <span class="badge bg-info text-dark fs-6">Administrativo (Consultas y Transacciones)</span>
+        <span class="badge bg-info text-dark fs-6">Administrativo (Consultas y Transacciones)</span>
         {% endif %}
     </p>
 </div>
@@ -21,7 +21,8 @@
             <div class="card-body">
                 <h6 class="card-title text-uppercase">Bandas</h6>
                 <h2 class="fw-bold">{{ metricas.total_bandas }}</h2>
-                <a href="{% url 'bandas_lista' %}" class="text-white-50 small text-decoration-none">Ver catálogo &rarr;</a>
+                <a href="{% url 'bandas_lista' %}" class="text-white-50 small text-decoration-none">Ver catálogo
+                    &rarr;</a>
             </div>
         </div>
     </div>
@@ -30,7 +31,8 @@
             <div class="card-body">
                 <h6 class="card-title text-uppercase">Tarifas Registradas</h6>
                 <h2 class="fw-bold">{{ metricas.total_tarifas }}</h2>
-                <a href="{% url 'tarifas_lista' %}" class="text-white-50 small text-decoration-none">Ver tarifas &rarr;</a>
+                <a href="{% url 'tarifas_lista' %}" class="text-white-50 small text-decoration-none">Ver tarifas
+                    &rarr;</a>
             </div>
         </div>
     </div>
@@ -39,7 +41,8 @@
             <div class="card-body">
                 <h6 class="card-title text-uppercase">Transacciones Emitidas</h6>
                 <h2 class="fw-bold">{{ metricas.total_tickets }}</h2>
-                <a href="{% url 'transaccion_ticket' %}" class="text-white-50 small text-decoration-none">Nueva orden &rarr;</a>
+                <a href="{% url 'transaccion_ticket' %}" class="text-white-50 small text-decoration-none">Nueva orden
+                    &rarr;</a>
             </div>
         </div>
     </div>
@@ -65,12 +68,12 @@
             <a href="{% url 'tarifas_lista' %}" class="btn btn-outline-secondary">📋 Ver Tarifas</a>
 
             {% if es_admin or es_supervisor %}
-                <a href="{% url 'bandas_lista' %}" class="btn btn-outline-primary">🎸 Mantenedor de Bandas</a>
-                <a href="{% url 'crear_banda' %}" class="btn btn-primary">+ Nueva Banda</a>
+            <a href="{% url 'bandas_lista' %}" class="btn btn-outline-primary">🎸 Mantenedor de Bandas</a>
+            <a href="{% url 'crear_banda' %}" class="btn btn-primary">+ Nueva Banda</a>
             {% endif %}
 
             {% if es_admin %}
-                <a href="{% url 'crear_tarifa' %}" class="btn btn-dark">+ Nueva Tarifa (Solo Admin)</a>
+            <a href="{% url 'crear_tarifa' %}" class="btn btn-dark">+ Nueva Tarifa (Solo Admin)</a>
             {% endif %}
         </div>
     </div>
@@ -100,7 +103,15 @@
                     {% for ticket in tickets_recientes %}
                     <tr>
                         <td><strong>{{ ticket.codigo_ticket }}</strong></td>
-                        <td>{{ ticket.cancion.titulo }} ({{ ticket.cancion.banda.nombre }})</td>
+                        <td>
+                            {% if ticket.cancion %}
+                            🎵 {{ ticket.cancion.titulo }} <small class="text-muted">({{ ticket.cancion.banda.nombre
+                                }})</small>
+                            {% elif ticket.banda %}
+                            💿 Álbum: <strong>{{ ticket.banda.album }}</strong> <small class="text-muted">({{
+                                ticket.banda.nombre }})</small>
+                            {% endif %}
+                        </td>
                         <td>{{ ticket.tarifa.modo_reproduccion }}</td>
                         <td>${{ ticket.monto_cobrado|floatformat:0 }}</td>
                         <td>{{ ticket.usuario.username }}</td>
@@ -109,7 +120,8 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="7" class="text-center py-4 text-muted">Aún no hay transacciones operacionales registradas.</td>
+                        <td colspan="7" class="text-center py-4 text-muted">Aún no hay transacciones operacionales
+                            registradas.</td>
                     </tr>
                     {% endfor %}
                 </tbody>

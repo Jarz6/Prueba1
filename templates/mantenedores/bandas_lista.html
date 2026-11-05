@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="fw-bold">🎸 Mantenedor de Bandas</h2>
@@ -22,20 +23,32 @@
         <table class="table table-hover align-middle mb-0">
             <thead class="table-light">
                 <tr>
+                    <th style="width: 90px;">Portada</th>
                     <th>Nombre</th>
                     <th>Álbum</th>
                     <th>Estilo</th>
-                    <th>Imagen</th>
                     <th class="text-end">Acciones</th>
                 </tr>
             </thead>
             <tbody>
                 {% for banda in bandas %}
                 <tr>
+                    <td>
+                        {% if banda.imagen %}
+                            {% if 'http' in banda.imagen %}
+                                <img src="{{ banda.imagen }}" alt="{{ banda.album }}" class="img-thumbnail rounded" style="width: 65px; height: 65px; object-fit: cover;">
+                            {% else %}
+                                <img src="{% static 'img/' %}{{ banda.imagen }}" alt="{{ banda.album }}" class="img-thumbnail rounded" style="width: 65px; height: 65px; object-fit: cover;" onerror="this.onerror=null; this.src='https://via.placeholder.com/65?text=Sin+Foto';">
+                            {% endif %}
+                        {% else %}
+                            <div class="bg-secondary text-white rounded d-flex align-items-center justify-content-center" style="width: 65px; height: 65px; font-size: 10px;">
+                                Sin Foto
+                            </div>
+                        {% endif %}
+                    </td>
                     <td class="fw-bold">{{ banda.nombre }}</td>
                     <td>{{ banda.album }}</td>
                     <td><span class="badge bg-secondary">{{ banda.estilo.nombre }}</span></td>
-                    <td><code>{{ banda.imagen }}</code></td>
                     <td class="text-end">
                         <a href="{% url 'editar_banda' banda.id %}" class="btn btn-sm btn-outline-warning">Modificar</a>
                         {% if user.is_superuser or 'Administrador' in user.groups.all.0.name %}
